@@ -15,8 +15,9 @@ jobs:
       # Each OS builds its own installer, so one failing doesn't cancel the others.
       fail-fast: false
       matrix:
-        # macos-latest is Apple Silicon; macos-15-intel builds the Intel app.
-        os: [ macos-latest, macos-15-intel, windows-latest, ubuntu-latest ]
+        # macos-latest is Apple Silicon; macos-15-intel builds the Intel app. Linux builds on 24.04, not the newest
+        # Ubuntu, so the deb installs on 24.04 and later.
+        os: [ macos-latest, macos-15-intel, windows-latest, ubuntu-24.04 ]
     runs-on: ${{ matrix.os }}
 
     steps:
