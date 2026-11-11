@@ -84,6 +84,14 @@ Deleting the folder resets the app.
 Installers for macOS, Windows and Linux are published with each release on GitHub and on
 [archeus.codes](https://archeus.codes).
 
+The Linux installer is a `.deb` for Ubuntu 24.04 and later. On a system with no desktop menu, such as Ubuntu under WSL,
+its install stops half configured, since it can't add the app to the menu. Create the menu folders, then finish it:
+
+```
+sudo mkdir -p /etc/xdg/menus /usr/share/applications /usr/share/desktop-directories
+sudo dpkg --configure archeus
+```
+
 ## Building
 
 It needs JDK 25. The Maven Wrapper downloads Maven itself, so there's nothing else to install.
