@@ -1,0 +1,10 @@
+target/
+.mvn/wrapper/maven-wrapper.jar
+# Written by the shade plugin during package
+dependency-reduced-pom.xml
+
+# IDE and OS files
+.idea/
+*.iml
+.vscode/
+.DS_Store

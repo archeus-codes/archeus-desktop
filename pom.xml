@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2026 Deiondre Andrews (Demonic722)
+
+  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+  License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+  version.
+
+  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License along with this program. If not, see
+  <https://www.gnu.org/licenses/>.
+
+  SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>codes.archeus</groupId>
+  <artifactId>archeus-desktop</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+
+  <name>archeus-desktop</name>
+  <description>A desktop editor for Nintendo DS cheat databases.</description>
+  <url>https://github.com/archeus-codes/archeus-desktop</url>
+
+  <licenses>
+    <license>
+      <name>GNU General Public License v3.0 or later</name>
+      <url>https://www.gnu.org/licenses/gpl-3.0.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Deiondre Andrews</name>
+      <id>Demonic722</id>
+    </developer>
+  </developers>
+
+  <scm>
+    <url>https://github.com/archeus-codes/archeus-desktop</url>
+    <connection>scm:git:https://github.com/archeus-codes/archeus-desktop.git</connection>
+    <developerConnection>scm:git:git@github.com:archeus-codes/archeus-desktop.git</developerConnection>
+  </scm>
+
+  <properties>
+    <maven.compiler.release>25</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <archeus-core.version>1.0.0</archeus-core.version>
+    <assertj.version>3.27.7</assertj.version>
+    <junit.version>6.1.3</junit.version>
+    <slf4j.version>2.0.20</slf4j.version>
+
+    <maven.clean.version>3.5.0</maven.clean.version>
+    <maven.compiler.version>3.16.0</maven.compiler.version>
+    <maven.dependency.version>3.11.0</maven.dependency.version>
+    <maven.install.version>3.2.0</maven.install.version>
+    <maven.jar.version>3.5.1</maven.jar.version>
+    <maven.resources.version>3.5.0</maven.resources.version>
+    <maven.surefire.version>3.6.1</maven.surefire.version>
+    <atlantafx.version>3.0.0</atlantafx.version>
+    <ikonli.version>12.4.0</ikonli.version>
+    <javafx.version>27.0.1</javafx.version>
+    <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
+    <jacoco.version>0.8.14</jacoco.version>
+    <maven.shade.plugin.version>3.6.2</maven.shade.plugin.version>
+    <main.class>codes.archeus.desktop.app.ArcheusDesktopApp</main.class>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <!-- The core library: domain model, parsers and writers -->
+    <dependency>
+      <groupId>codes.archeus</groupId>
+      <artifactId>archeus-core</artifactId>
+      <version>${archeus-core.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.github.mkpaz</groupId>
+      <artifactId>atlantafx-base</artifactId>
+      <version>${atlantafx.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kordamp.ikonli</groupId>
+      <artifactId>ikonli-javafx</artifactId>
+      <version>${ikonli.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kordamp.ikonli</groupId>
+      <artifactId>ikonli-materialdesign2-pack</artifactId>
+      <version>${ikonli.version}</version>
+    </dependency>
+
+    <!-- Logging, written to the console -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <directory>${project.basedir}</directory>
+        <targetPath>META-INF/archeus</targetPath>
+        <includes>
+          <include>LICENSE</include>
+          <include>THIRD-PARTY-LICENSES</include>
+        </includes>
+      </resource>
+    </resources>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>${maven.clean.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven.compiler.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>${maven.dependency.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>${maven.install.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven.jar.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>${maven.resources.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven.surefire.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>${maven.shade.plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals><goal>shade</goal></goals>
+            <configuration>
+              <!-- Drops the dependencies' license files, whose notices are in THIRD-PARTY-LICENSES. The jar carries
+                   that and this project's LICENSE in META-INF/archeus. -->
+              <filters>
+                <filter>
+                  <artifact>*:*:*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/LICENSE*</exclude>
+                    <exclude>META-INF/NOTICE*</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>codes.archeus.desktop.app.Launcher</mainClass>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-maven-plugin</artifactId>
+        <version>${javafx.maven.plugin.version}</version>
+        <configuration>
+          <mainClass>${main.class}</mainClass>
+        </configuration>
+      </plugin>
+
+      <!-- Lists the libraries the app ships with, for ThirdPartyLicensesTest to check against THIRD-PARTY-LICENSES -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>list-runtime-dependencies</id>
+            <phase>generate-test-resources</phase>
+            <goals><goal>list</goal></goals>
+            <configuration>
+              <includeScope>runtime</includeScope>
+              <outputFile>${project.build.directory}/runtime-dependencies.txt</outputFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.version}</version>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals><goal>prepare-agent</goal></goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>verify</phase>
+            <goals><goal>report</goal></goals>
+          </execution>
+          <execution>
+            <id>check</id>
+            <phase>verify</phase>
+            <goals><goal>check</goal></goals>
+            <configuration>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.85</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>mac-aarch64</id>
+      <activation>
+        <os><family>mac</family><arch>aarch64</arch></os>
+      </activation>
+      <properties>
+        <javafx.platform.classifier>mac-aarch64</javafx.platform.classifier>
+        <runtime.native.dir>lib</runtime.native.dir>
+        <jpackage.icon>${project.basedir}/src/main/packaging/macos/Archeus.icns</jpackage.icon>
+        <jpackage.app.image>${project.build.directory}/dist/Archeus.app</jpackage.app.image>
+        <jpackage.installer.type>dmg</jpackage.installer.type>
+        <jpackage.installer.options>--mac-package-name Archeus</jpackage.installer.options>
+      </properties>
+    </profile>
+    <profile>
+      <id>mac-x86_64</id>
+      <activation>
+        <os><family>mac</family><arch>x86_64</arch></os>
+      </activation>
+      <properties>
+        <javafx.platform.classifier>mac</javafx.platform.classifier>
+        <runtime.native.dir>lib</runtime.native.dir>
+        <jpackage.icon>${project.basedir}/src/main/packaging/macos/Archeus.icns</jpackage.icon>
+        <jpackage.app.image>${project.build.directory}/dist/Archeus.app</jpackage.app.image>
+        <jpackage.installer.type>dmg</jpackage.installer.type>
+        <jpackage.installer.options>--mac-package-name Archeus</jpackage.installer.options>
+      </properties>
+    </profile>
+    <profile>
+      <id>windows</id>
+      <activation>
+        <os><family>windows</family></os>
+      </activation>
+      <properties>
+        <javafx.platform.classifier>win</javafx.platform.classifier>
+        <runtime.native.dir>bin</runtime.native.dir>
+        <jpackage.icon>${project.basedir}/src/main/packaging/windows/Archeus.ico</jpackage.icon>
+        <jpackage.app.image>${project.build.directory}/dist/Archeus</jpackage.app.image>
+        <jpackage.installer.type>msi</jpackage.installer.type>
+        <!-- The upgrade code stays the same across versions, so installing a new version replaces the old one. The
+             installation is per user, always under AppData with no folder choice, so installing or upgrading needs no
+             admin prompt. Changing the scope or the upgrade code strands existing installations. The shortcut prompt
+             gives the installer its wizard, ending on a page that says setup finished. -->
+        <jpackage.installer.options>--win-per-user-install --win-menu --win-shortcut --win-shortcut-prompt --win-upgrade-uuid 8fa6b2bf-ed64-4d62-a262-b890acde6f96</jpackage.installer.options>
+      </properties>
+    </profile>
+    <profile>
+      <id>linux-aarch64</id>
+      <activation>
+        <os><name>Linux</name><arch>aarch64</arch></os>
+      </activation>
+      <properties>
+        <javafx.platform.classifier>linux-aarch64</javafx.platform.classifier>
+        <runtime.native.dir>lib</runtime.native.dir>
+        <jpackage.icon>${project.basedir}/src/main/packaging/linux/Archeus.png</jpackage.icon>
+        <jpackage.app.image>${project.build.directory}/dist/Archeus</jpackage.app.image>
+        <jpackage.installer.type>deb</jpackage.installer.type>
+        <jpackage.installer.options>--linux-package-name archeus --linux-shortcut --linux-menu-group Utility --linux-app-category utils</jpackage.installer.options>
+      </properties>
+    </profile>
+    <profile>
+      <id>linux-x86_64</id>
+      <activation>
+        <os><name>Linux</name><arch>amd64</arch></os>
+      </activation>
+      <properties>
+        <javafx.platform.classifier>linux</javafx.platform.classifier>
+        <runtime.native.dir>lib</runtime.native.dir>
+        <jpackage.icon>${project.basedir}/src/main/packaging/linux/Archeus.png</jpackage.icon>
+        <jpackage.app.image>${project.build.directory}/dist/Archeus</jpackage.app.image>
+        <jpackage.installer.type>deb</jpackage.installer.type>
+        <jpackage.installer.options>--linux-package-name archeus --linux-shortcut --linux-menu-group Utility --linux-app-category utils</jpackage.installer.options>
+      </properties>
+    </profile>
+
+    <!--
+      Builds the app image in target/dist. jlink builds the Java runtime from the JDK Maven runs on and the JavaFX
+      jars, and JavaFX's native libraries go into it, all before jpackage runs. jpackage then copies that runtime in
+      and signs the app (ad hoc on macOS), so nothing changes the app after it's signed. Build with package or later.
+    -->
+    <profile>
+      <id>jpackage</id>
+      <build>
+        <plugins>
+          <!-- Splits the project version into parts, so the app's version is 1.0.0 for 1.0.0-SNAPSHOT: jpackage takes
+               numbers only. The project version needs all three parts; 1.0 would give "1.0." -->
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>3.6.2</version>
+            <executions>
+              <execution>
+                <id>parse-version</id>
+                <goals><goal>parse-version</goal></goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!-- The app image's runtime holds JavaFX as modules, so the jar it runs leaves JavaFX out. -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>default</id>
+                <configuration>
+                  <artifactSet>
+                    <excludes>
+                      <exclude>org.openjfx:*</exclude>
+                    </excludes>
+                  </artifactSet>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-javafx-mods</id>
+                <phase>prepare-package</phase>
+                <goals><goal>copy-dependencies</goal></goals>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/javafx-mods</outputDirectory>
+                  <includeGroupIds>org.openjfx</includeGroupIds>
+                  <includeClassifiers>${javafx.platform.classifier}</includeClassifiers>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+              <!-- Runs before jpackage only while this plugin is declared above the exec plugin, since both run in
+                   the package phase. -->
+              <execution>
+                <id>prepare-app-input</id>
+                <phase>package</phase>
+                <goals><goal>run</goal></goals>
+                <configuration>
+                  <target>
+                    <!-- jlink and jpackage both refuse to write over an earlier build's output, and jpackage would
+                         take an earlier version's jar left in app-input too. -->
+                    <delete dir="${project.build.directory}/runtime"/>
+                    <delete dir="${project.build.directory}/dist"/>
+                    <delete dir="${project.build.directory}/installer"/>
+                    <delete dir="${project.build.directory}/app-input"/>
+                    <delete dir="${project.build.directory}/javafx-native"/>
+
+                    <exec executable="${java.home}/bin/jlink" failonerror="true">
+                      <arg value="--module-path"/>
+                      <arg value="${project.build.directory}/javafx-mods"/>
+                      <arg value="--add-modules"/>
+                      <arg value="javafx.controls,javafx.fxml,java.logging,java.net.http"/>
+                      <arg value="--strip-native-commands"/>
+                      <arg value="--strip-debug"/>
+                      <arg value="--no-man-pages"/>
+                      <arg value="--no-header-files"/>
+                      <arg value="--compress=zip-6"/>
+                      <arg value="--output"/>
+                      <arg value="${project.build.directory}/runtime"/>
+                    </exec>
+
+                    <!-- JavaFX looks for its native libraries in the runtime first. Linked from the jars, they'd only
+                         be resources, which JavaFX unpacks into the user's home folder on each launch. -->
+                    <unzip dest="${project.build.directory}/javafx-native">
+                      <fileset dir="${project.build.directory}/javafx-mods" includes="*.jar"/>
+                      <patternset includes="**/*.dylib,**/*.dll,**/*.so"/>
+                    </unzip>
+                    <copy todir="${project.build.directory}/runtime/${runtime.native.dir}" flatten="true">
+                      <fileset dir="${project.build.directory}/javafx-native" includes="**/*.dylib,**/*.dll,**/*.so"/>
+                    </copy>
+
+                    <mkdir dir="${project.build.directory}/app-input"/>
+                    <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                          todir="${project.build.directory}/app-input"/>
+                    <copy todir="${project.build.directory}/app-input">
+                      <fileset dir="${project.basedir}" includes="LICENSE,THIRD-PARTY-LICENSES"/>
+                    </copy>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.6.4</version>
+            <executions>
+              <execution>
+                <id>jpackage</id>
+                <phase>package</phase>
+                <goals><goal>exec</goal></goals>
+                <configuration>
+                  <executable>${java.home}/bin/jpackage</executable>
+                  <commandlineArgs>--type app-image --name Archeus --app-version ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion} --vendor Archeus --input ${project.build.directory}/app-input --main-jar ${project.build.finalName}.jar --main-class codes.archeus.desktop.app.Launcher --runtime-image ${project.build.directory}/runtime --java-options "--add-modules=javafx.controls,javafx.fxml,java.logging,java.net.http --enable-native-access=javafx.graphics" --icon ${jpackage.icon} --dest ${project.build.directory}/dist</commandlineArgs>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!--
+      Used with the jpackage profile, which builds the app image it needs, and declared after it so it runs second.
+      Builds the platform's installer in target/installer from the app image: a dmg on macOS, an
+      msi on Windows (which needs the WiX Toolset) and a deb on Linux (which needs dpkg and fakeroot).
+    -->
+    <profile>
+      <id>installer</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.6.4</version>
+            <executions>
+              <execution>
+                <id>jpackage-installer</id>
+                <phase>package</phase>
+                <goals><goal>exec</goal></goals>
+                <configuration>
+                  <executable>${java.home}/bin/jpackage</executable>
+                  <commandlineArgs>--type ${jpackage.installer.type} --name Archeus --app-version ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion} --vendor Archeus --app-image ${jpackage.app.image} --license-file ${project.basedir}/LICENSE ${jpackage.installer.options} --dest ${project.build.directory}/installer</commandlineArgs>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>

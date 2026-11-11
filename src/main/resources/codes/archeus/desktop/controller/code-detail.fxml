@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="codes.archeus.desktop.controller.CodeDetailController"
+      spacing="12">
+
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <Label text="Code" styleClass="title-4"/>
+
+    <GridPane hgap="12" vgap="8">
+        <columnConstraints>
+            <ColumnConstraints minWidth="80" prefWidth="100"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <Label text="Title" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="text-subtle"/>
+        <TextField fx:id="titleField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Comment" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="text-subtle"/>
+        <TextField fx:id="commentField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <Label text="Enabled" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="text-subtle"/>
+        <CheckBox fx:id="enabledCheckBox" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <Separator/>
+
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <Button fx:id="deleteButton"/>
+    </HBox>
+
+    <fx:include fx:id="buttonActivator" source="button-activator.fxml"/>
+
+    <Separator/>
+
+    <Label text="Code Lines" styleClass="text-subtle"/>
+    <TextArea fx:id="codeLinesArea" wrapText="false"
+              styleClass="text-area"
+              VBox.vgrow="ALWAYS" prefRowCount="8"
+              style="-fx-font-family: monospace;"/>
+
+</VBox>

@@ -1,0 +1,106 @@
+/* Stat cards in the file pane */
+
+.stat-card {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 12px;
+    -fx-spacing: 4px;
+}
+
+.stat-value {
+    -fx-font-size: 1.6em;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-accent-fg;
+}
+
+.stat-label {
+    -fx-font-size: 0.8em;
+    -fx-text-fill: -color-fg-muted;
+}
+
+/* Button Activator, laid out like a DS */
+
+.ctrl-btn {
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-max-width: 30px;
+    -fx-max-height: 30px;
+    -fx-pref-width: 30px;
+    -fx-pref-height: 30px;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-font-size: 0.75em;
+    -fx-font-weight: bold;
+}
+
+.ctrl-btn:selected {
+    -fx-background-color: -color-accent-fg;
+    -fx-text-fill: -color-bg-default;
+    -fx-border-color: -color-accent-fg;
+}
+
+.ctrl-face {
+    -fx-background-radius: 15px;
+    -fx-border-radius: 15px;
+}
+
+.ctrl-dpad {
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+}
+
+.ctrl-shoulder {
+    -fx-min-width: 48px;
+    -fx-max-width: 48px;
+    -fx-pref-width: 48px;
+    -fx-min-height: 22px;
+    -fx-max-height: 22px;
+    -fx-pref-height: 22px;
+    -fx-background-radius: 6px 6px 2px 2px;
+    -fx-border-radius: 6px 6px 2px 2px;
+}
+
+.ctrl-system {
+    -fx-min-width: 56px;
+    -fx-max-width: 56px;
+    -fx-pref-width: 56px;
+    -fx-min-height: 22px;
+    -fx-max-height: 22px;
+    -fx-pref-height: 22px;
+    -fx-background-radius: 11px;
+    -fx-border-radius: 11px;
+}
+
+/* Tree scrollbar */
+
+.tree-view .scroll-bar:vertical {
+    -fx-pref-width: 12px;
+}
+
+/* Arrow buttons: hidden, but the vertical ones keep a 12px width, which sets the thumb's minimum length */
+
+.tree-view .scroll-bar .increment-button,
+.tree-view .scroll-bar .decrement-button {
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+    -fx-max-width: 0;
+    -fx-max-height: 0;
+}
+
+.tree-view .scroll-bar:vertical .increment-button,
+.tree-view .scroll-bar:vertical .decrement-button {
+    -fx-pref-width: 12px;
+    -fx-max-width: 12px;
+}
+
+.tree-view .scroll-bar .increment-arrow,
+.tree-view .scroll-bar .decrement-arrow {
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+}

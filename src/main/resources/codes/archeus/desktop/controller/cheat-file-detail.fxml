@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="codes.archeus.desktop.controller.CheatFileDetailController"
+      spacing="12">
+
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <Label text="Database" styleClass="title-4"/>
+
+    <HBox spacing="12">
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label fx:id="gamesCountLabel" styleClass="stat-value"/>
+            <Label text="Games" styleClass="stat-label"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label fx:id="foldersCountLabel" styleClass="stat-value"/>
+            <Label text="Folders" styleClass="stat-label"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+            <Label fx:id="codesCountLabel" styleClass="stat-value"/>
+            <Label text="Codes" styleClass="stat-label"/>
+        </VBox>
+    </HBox>
+
+    <Label text="Games by Region" styleClass="text-subtle"/>
+
+    <HBox spacing="12">
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="0" maxWidth="Infinity">
+            <Label fx:id="usaCountLabel" styleClass="stat-value"/>
+            <Label text="United States" styleClass="stat-label" maxWidth="Infinity"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="0" maxWidth="Infinity">
+            <Label fx:id="jpnCountLabel" styleClass="stat-value"/>
+            <Label text="Japan" styleClass="stat-label" maxWidth="Infinity"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="0" maxWidth="Infinity">
+            <Label fx:id="eurCountLabel" styleClass="stat-value"/>
+            <Label text="Europe" styleClass="stat-label" maxWidth="Infinity"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="0" maxWidth="Infinity">
+            <Label fx:id="otherCountLabel" styleClass="stat-value"/>
+            <Label text="Other" styleClass="stat-label" maxWidth="Infinity"/>
+        </VBox>
+    </HBox>
+
+    <Separator/>
+
+    <GridPane hgap="12" vgap="8">
+        <columnConstraints>
+            <ColumnConstraints minWidth="80" prefWidth="100"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <Label text="Title" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="text-subtle"/>
+        <TextField fx:id="titleField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Enabled" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="text-subtle"/>
+        <CheckBox fx:id="enabledCheckBox" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <Separator/>
+
+    <Label text="File Info" styleClass="text-subtle"/>
+
+    <GridPane hgap="12" vgap="8">
+        <columnConstraints>
+            <ColumnConstraints minWidth="80" prefWidth="100"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <Label text="Path" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="text-subtle"/>
+        <TextField fx:id="filePathField" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                   editable="false" styleClass="text-subtle"/>
+
+        <Label text="Modified" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="text-subtle"/>
+        <Label fx:id="fileModifiedLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="text-subtle"/>
+
+        <Label text="Size" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="text-subtle"/>
+        <Label fx:id="fileSizeLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="text-subtle"/>
+    </GridPane>
+
+    <Separator/>
+
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <Button fx:id="addGameButton"/>
+    </HBox>
+
+</VBox>

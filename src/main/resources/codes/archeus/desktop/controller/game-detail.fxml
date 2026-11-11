@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="codes.archeus.desktop.controller.GameDetailController"
+      spacing="12">
+
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <HBox spacing="16" alignment="TOP_LEFT">
+        <VBox spacing="12" HBox.hgrow="ALWAYS">
+            <Label text="Game" styleClass="title-4"/>
+
+            <GridPane hgap="12" vgap="8">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="80" prefWidth="100"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <Label text="Title" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="text-subtle"/>
+                <TextField fx:id="titleField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Game ID" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="text-subtle"/>
+                <HBox GridPane.rowIndex="1" GridPane.columnIndex="1" spacing="8" alignment="CENTER_LEFT">
+                    <TextField fx:id="gameIdField" prefColumnCount="13"/>
+                    <Button fx:id="loadRomButton"/>
+                    <Button fx:id="findDuplicatesButton"/>
+                </HBox>
+
+                <Label text="Enabled" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="text-subtle"/>
+                <CheckBox fx:id="enabledCheckBox" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            </GridPane>
+        </VBox>
+
+        <ImageView fx:id="boxartView" fitWidth="220" fitHeight="200"
+                   preserveRatio="true" smooth="true"/>
+    </HBox>
+
+    <Separator/>
+
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <Button fx:id="addFolderButton"/>
+        <Button fx:id="addCodeButton"/>
+        <MenuButton fx:id="exportButton"/>
+        <Button fx:id="deleteButton"/>
+    </HBox>
+
+    <Separator/>
+
+    <Label text="Master Code" styleClass="text-subtle"/>
+    <TextArea fx:id="masterCodeArea" wrapText="false"
+              styleClass="text-area"
+              VBox.vgrow="ALWAYS" prefRowCount="4"
+              style="-fx-font-family: monospace;"/>
+
+</VBox>
