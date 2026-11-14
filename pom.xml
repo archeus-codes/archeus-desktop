@@ -502,7 +502,7 @@
                 <goals><goal>exec</goal></goals>
                 <configuration>
                   <executable>${java.home}/bin/jpackage</executable>
-                  <commandlineArgs>--type app-image --name Archeus --app-version ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion} --vendor Archeus --input ${project.build.directory}/app-input --main-jar ${project.build.finalName}.jar --main-class codes.archeus.desktop.app.Launcher --runtime-image ${project.build.directory}/runtime --java-options "--add-modules=javafx.controls,javafx.fxml,java.logging,java.net.http --enable-native-access=javafx.graphics" --icon ${jpackage.icon} --dest ${project.build.directory}/dist</commandlineArgs>
+                  <commandlineArgs>--type app-image --name Archeus --app-version ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion} --vendor Archeus --input ${project.build.directory}/app-input --main-jar ${project.build.finalName}.jar --main-class codes.archeus.desktop.app.Launcher --runtime-image ${project.build.directory}/runtime --java-options "--add-modules=javafx.controls,javafx.fxml,java.logging,java.net.http --enable-native-access=javafx.graphics -XX:G1PeriodicGCInterval=30000 -XX:-G1PeriodicGCInvokesConcurrent -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=30" --icon ${jpackage.icon} --dest ${project.build.directory}/dist</commandlineArgs>
                 </configuration>
               </execution>
             </executions>
