@@ -67,7 +67,7 @@
     <ikonli.version>12.4.0</ikonli.version>
     <javafx.version>27.0.1</javafx.version>
     <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
-    <jacoco.version>0.8.14</jacoco.version>
+    <jacoco.version>0.8.16</jacoco.version>
     <maven.shade.plugin.version>3.6.2</maven.shade.plugin.version>
     <main.class>codes.archeus.desktop.app.ArcheusDesktopApp</main.class>
   </properties>
@@ -390,7 +390,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
-            <version>3.6.2</version>
+            <version>3.7.0</version>
             <executions>
               <execution>
                 <id>parse-version</id>
