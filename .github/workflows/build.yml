@@ -25,9 +25,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Pinned, since each installer bundles a runtime made from this JDK.
       - uses: actions/setup-java@v6
         with:
-          java-version: '25'
+          java-version: '25.0.5'
           distribution: 'temurin'
           cache: 'maven'
 
