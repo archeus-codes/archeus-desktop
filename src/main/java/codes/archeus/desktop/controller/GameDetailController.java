@@ -194,7 +194,7 @@ public class GameDetailController extends DetailController<GameViewModel> {
 		showGameId(vm);
 		shownMasterCode = showUnfiltered(masterCodeArea, CodeText.formatMasterCode(vm.getMasterCode()));
 		loadBoxart(vm.getSerial().replace("\0", ""));
-		exportItems.forEach((format, item) -> item.setDisable(!format.holdsAny(vm.getGame())));
+		exportItems.forEach((format, item) -> item.setDisable(!format.gameFileFormat().holdsAny(vm.getGame())));
 	}
 
 	@Override
@@ -342,9 +342,9 @@ public class GameDetailController extends DetailController<GameViewModel> {
 		flush();
 		Game game = currentVm.getGame();
 
-		exportChooser.choose(format, format.fileName(game)).ifPresent(target -> {
+		exportChooser.choose(format, format.gameFileFormat().fileName(game)).ifPresent(target -> {
 			try (var out = Files.newOutputStream(target.toPath())) {
-				format.write(game, out);
+				format.gameFileFormat().write(game, out);
 			} catch (IOException e) {
 				log.warn("Could not export {}: {}", target, e.getMessage());
 				alertShower.accept(exportErrorAlert(target.getName()));
@@ -357,7 +357,7 @@ public class GameDetailController extends DetailController<GameViewModel> {
 		chooser.setTitle("Export for an Emulator");
 		chooser.setInitialFileName(suggestedName);
 		chooser.getExtensionFilters().add(
-				new FileChooser.ExtensionFilter(format.description(), "*" + format.extension())
+				new FileChooser.ExtensionFilter(format.description(), "*" + format.gameFileFormat().extension())
 		);
 		return Optional.ofNullable(chooser.showSaveDialog(exportButton.getScene().getWindow()));
 	}

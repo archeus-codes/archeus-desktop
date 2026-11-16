@@ -26,8 +26,8 @@ import java.util.Optional;
  */
 public final class FileChooserUtil {
 	public static final FileChooser.ExtensionFilter ALL_FILTER =
-			new FileChooser.ExtensionFilter("NDS Cheat Files (*.dat, *.xml, *.evoCheats)",
-					"*.dat", "*.xml", "*.evoCheats");
+			new FileChooser.ExtensionFilter("NDS Cheat Files (*.dat, *.xml, *.evoCheats, *.db)",
+					"*.dat", "*.xml", "*.evoCheats", "*.db");
 
 	public static final FileChooser.ExtensionFilter USRCHEAT_FILTER =
 			new FileChooser.ExtensionFilter("R4 Cheat DB (usrcheat.dat)", "*.dat");
@@ -37,6 +37,12 @@ public final class FileChooserUtil {
 
 	public static final FileChooser.ExtensionFilter EVO_FILTER =
 			new FileChooser.ExtensionFilter("CycloDS evoCheats (user.evoCheats)", "*.evoCheats");
+
+	public static final FileChooser.ExtensionFilter M3_FILTER =
+			new FileChooser.ExtensionFilter("M3 Cheat DB (cheat_EN.db)", "*.db");
+
+	public static final FileChooser.ExtensionFilter EZARCODE_FILTER =
+			new FileChooser.ExtensionFilter("EZ-Flash V Cheat DB (ezarcode.dat)", "*.dat");
 
 	public static final FileChooser.ExtensionFilter XML_FILTER =
 			new FileChooser.ExtensionFilter("XML Cheat DB (*.xml)", "*.xml");

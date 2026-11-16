@@ -45,6 +45,10 @@ import codes.archeus.core.parser.CheatFileWriter;
 import codes.archeus.core.parser.EdgeCheatsParser;
 import codes.archeus.core.parser.EdgeCheatsWriter;
 import codes.archeus.core.parser.EvoCheatsWriter;
+import codes.archeus.core.parser.EzArCodeParser;
+import codes.archeus.core.parser.EzArCodeWriter;
+import codes.archeus.core.parser.M3CheatsParser;
+import codes.archeus.core.parser.M3CheatsWriter;
 import codes.archeus.core.parser.UsercheatDatParser;
 import codes.archeus.core.parser.UsercheatDatWriter;
 import codes.archeus.core.parser.UsayLimits;
@@ -430,6 +434,26 @@ class FileHandlerTest {
 	}
 
 	@Test
+	void saveAs_edgeChosenForAGameWithAnEmptyFolderAndCancel_asksAndWritesNothing() throws Exception {
+		Game game = game("Mario Kart DS (USA)");
+		var empty = new Folder();
+		empty.setTitle("New Folder");
+		game.getFolders().add(empty);
+
+		openAndWait(write("usrcheat.dat", new UsercheatDatWriter(), game));
+		File chosen = dir.resolve("cheats.dat").toFile();
+		host.toSave = new FileChooserUtil.SaveResult(chosen, FileChooserUtil.EDGE_FILTER);
+		host.answer = "Cancel";
+
+		FxThread.run(() -> {
+			assertThat(handler.saveAs()).isFalse();
+
+			assertThat(host.asked).singleElement().asString().contains("1 folder is empty");
+		});
+		assertThat(chosen).doesNotExist();
+	}
+
+	@Test
 	void saveAs_fromAnEdgeFile_offersEdgeFirstAndOnlyOnce() throws Exception {
 		openAndWait(write("cheats.dat", new EdgeCheatsWriter(), game("Mario Kart DS (USA)")));
 
@@ -437,7 +461,7 @@ class FileHandlerTest {
 			assertThat(handler.saveAs()).isFalse();
 
 			assertThat(host.saveFilters.getFirst()).isSameAs(FileChooserUtil.EDGE_FILTER);
-			assertThat(host.saveFilters).hasSize(5).doesNotHaveDuplicates();
+			assertThat(host.saveFilters).hasSize(7).doesNotHaveDuplicates();
 		});
 	}
 
@@ -520,13 +544,185 @@ class FileHandlerTest {
 				FileChooserUtil.EDGE_FILTER, "cheats.dat",
 				FileChooserUtil.EVO_FILTER, "user.evoCheats",
 				FileChooserUtil.XML_FILTER, "cheats.xml",
-				FileChooserUtil.ACTION_REPLAY_XML_FILTER, "cheats.xml"
+				FileChooserUtil.ACTION_REPLAY_XML_FILTER, "cheats.xml",
+				FileChooserUtil.M3_FILTER, "cheat_EN.db",
+				FileChooserUtil.EZARCODE_FILTER, "ezarcode.dat"
 		);
 
 		assertThat(fileNames).allSatisfy((filter, fileName) -> {
 			var writer = FileHandler.writerForSaveResult(new File(fileName), filter);
 			assertThat(FileHandler.filterForWriter(writer)).as(fileName).isSameAs(filter);
 		});
+	}
+
+	@Test
+	void writerForSaveResult_dbFile_writesM3() {
+		var writer = FileHandler.writerForSaveResult(new File("cheat_EN.db"), FileChooserUtil.M3_FILTER);
+
+		assertThat(writer).isInstanceOf(M3CheatsWriter.class);
+	}
+
+	@Test
+	void open_anM3File_readsItAndSavesBackAsM3() throws Exception {
+		openAndWait(write("cheat_EN.db", new M3CheatsWriter(), game("Mario Kart DS (USA)")));
+
+		FxThread.run(() -> {
+			assertThat(gameTitlesInTheTree()).containsExactly("Mario Kart DS (USA)");
+			assertThat(session.getWriter()).isInstanceOf(M3CheatsWriter.class);
+		});
+	}
+
+	@Test
+	void saveAs_m3ChosenWithNothingItCantHold_savesWithoutAsking() throws Exception {
+		openAndWait(write("usrcheat.dat", new UsercheatDatWriter(), game("Mario Kart DS (USA)")));
+		File chosen = dir.resolve("cheat_EN.db").toFile();
+		host.toSave = new FileChooserUtil.SaveResult(chosen, FileChooserUtil.M3_FILTER);
+
+		FxThread.run(() -> {
+			assertThat(handler.saveAs()).isTrue();
+
+			assertThat(host.asked).isEmpty();
+		});
+		assertThat(m3GameTitlesIn(chosen)).containsExactly("Mario Kart DS (USA)");
+	}
+
+	@Test
+	void saveAs_m3ChosenForAGameWithAnEmptyFolderAndSaveAnyway_leavesTheFolderOut() throws Exception {
+		Game game = game("Mario Kart DS (USA)");
+		var empty = new Folder();
+		empty.setTitle("New Folder");
+		game.getFolders().add(empty);
+
+		openAndWait(write("usrcheat.dat", new UsercheatDatWriter(), game));
+		File chosen = dir.resolve("cheat_EN.db").toFile();
+		host.toSave = new FileChooserUtil.SaveResult(chosen, FileChooserUtil.M3_FILTER);
+		host.answer = "Save Anyway";
+
+		FxThread.run(() -> {
+			assertThat(handler.saveAs()).isTrue();
+
+			assertThat(host.asked).singleElement().asString().contains("1 folder is empty");
+		});
+		try (var in = new FileInputStream(chosen)) {
+			assertThat(new M3CheatsParser().parse(in).games().getFirst().getFolders()).isEmpty();
+		}
+	}
+
+	@Test
+	void saveAs_m3ChosenForAGameWithAMasterCodeAndCancel_writesNothing() throws Exception {
+		openAndWait(write("usrcheat.dat", new UsercheatDatWriter(), gameWithAMasterCode()));
+		File chosen = dir.resolve("cheat_EN.db").toFile();
+		host.toSave = new FileChooserUtil.SaveResult(chosen, FileChooserUtil.M3_FILTER);
+		host.answer = "Cancel";
+
+		FxThread.run(() -> {
+			assertThat(handler.saveAs()).isFalse();
+
+			assertThat(host.asked).singleElement().asString().contains("1 game has a master code");
+		});
+		assertThat(chosen).doesNotExist();
+	}
+
+	@Test
+	void saveAs_m3ChosenForAGameWithAMasterCodeAndSaveAnyway_writesIt() throws Exception {
+		openAndWait(write("usrcheat.dat", new UsercheatDatWriter(), gameWithAMasterCode()));
+		File chosen = dir.resolve("cheat_EN.db").toFile();
+		host.toSave = new FileChooserUtil.SaveResult(chosen, FileChooserUtil.M3_FILTER);
+		host.answer = "Save Anyway";
+
+		FxThread.run(() -> assertThat(handler.saveAs()).isTrue());
+
+		assertThat(m3GameTitlesIn(chosen)).containsExactly("Mario Kart DS (USA)");
+	}
+
+	@Test
+	void writerForSaveResult_datFileWithTheEzFlashFilter_writesEzArCode() {
+		var writer = FileHandler.writerForSaveResult(new File("ezarcode.dat"), FileChooserUtil.EZARCODE_FILTER);
+
+		assertThat(writer).isInstanceOf(EzArCodeWriter.class);
+	}
+
+	@Test
+	void open_anEzArCodeFile_readsItAndSavesBackAsEzArCode() throws Exception {
+		openAndWait(write("ezarcode.dat", new EzArCodeWriter(), game("Mario Kart DS (USA)")));
+
+		FxThread.run(() -> {
+			assertThat(gameTitlesInTheTree()).containsExactly("Mario Kart DS (USA)");
+			assertThat(session.getWriter()).isInstanceOf(EzArCodeWriter.class);
+		});
+	}
+
+	@Test
+	void saveAs_ezArCodeChosenWithNoMasterCodes_savesWithoutAsking() throws Exception {
+		openAndWait(write("usrcheat.dat", new UsercheatDatWriter(), game("Mario Kart DS (USA)")));
+		File chosen = dir.resolve("ezarcode.dat").toFile();
+		host.toSave = new FileChooserUtil.SaveResult(chosen, FileChooserUtil.EZARCODE_FILTER);
+
+		FxThread.run(() -> {
+			assertThat(handler.saveAs()).isTrue();
+
+			assertThat(host.asked).isEmpty();
+		});
+		try (var in = new FileInputStream(chosen)) {
+			assertThat(new EzArCodeParser().parse(in).games()).extracting(Game::getTitle)
+					.containsExactly("Mario Kart DS (USA)");
+		}
+	}
+
+	@Test
+	void saveAs_ezArCodeChosenForAGameWithAMasterCodeAndCancel_writesNothing() throws Exception {
+		openAndWait(write("usrcheat.dat", new UsercheatDatWriter(), gameWithAMasterCode()));
+		File chosen = dir.resolve("ezarcode.dat").toFile();
+		host.toSave = new FileChooserUtil.SaveResult(chosen, FileChooserUtil.EZARCODE_FILTER);
+		host.answer = "Cancel";
+
+		FxThread.run(() -> {
+			assertThat(handler.saveAs()).isFalse();
+
+			assertThat(host.asked).singleElement().asString().contains("1 game has a master code");
+		});
+		assertThat(chosen).doesNotExist();
+	}
+
+	@Test
+	void saveAs_ezArCodeChosenForAGameWithAMasterCodeAndSaveAnyway_writesIt() throws Exception {
+		openAndWait(write("usrcheat.dat", new UsercheatDatWriter(), gameWithAMasterCode()));
+		File chosen = dir.resolve("ezarcode.dat").toFile();
+		host.toSave = new FileChooserUtil.SaveResult(chosen, FileChooserUtil.EZARCODE_FILTER);
+		host.answer = "Save Anyway";
+
+		FxThread.run(() -> assertThat(handler.saveAs()).isTrue());
+
+		try (var in = new FileInputStream(chosen)) {
+			assertThat(new EzArCodeParser().parse(in).games()).extracting(Game::getTitle)
+					.containsExactly("Mario Kart DS (USA)");
+		}
+	}
+
+	@Test
+	void open_anEzArCodeFile_readsTheDatabaseAsEnabled() throws Exception {
+		openAndWait(write("ezarcode.dat", new EzArCodeWriter(), game("Mario Kart DS (USA)")));
+
+		FxThread.run(() -> assertThat(session.getViewModel().getCheatFile().isEnabled()).isTrue());
+	}
+
+	@Test
+	void save_anEzArCodeFileAfterAMasterCodeIsAddedAndCancel_leavesTheFileAlone() throws Exception {
+		File file = write("ezarcode.dat", new EzArCodeWriter(), game("Mario Kart DS (USA)"));
+		byte[] before = Files.readAllBytes(file.toPath());
+		openAndWait(file);
+		host.answer = "Cancel";
+
+		FxThread.run(() -> {
+			Game game = session.getViewModel().getCheatFile().getGames().getFirst();
+			game.setMasterCode(new ArrayList<>(List.of("1234ABCD", "00000001")));
+			session.markDirty();
+
+			assertThat(handler.save()).isFalse();
+
+			assertThat(host.asked).singleElement().asString().contains("1 game has a master code");
+		});
+		assertThat(Files.readAllBytes(file.toPath())).isEqualTo(before);
 	}
 
 	@Test
@@ -607,6 +803,18 @@ class FileHandlerTest {
 		try (var in = new RandomAccessFile(file, "r")) {
 			return new UsercheatDatParser().parse(in).cheatFile().getGames().stream().map(Game::getTitle).toList();
 		}
+	}
+
+	private static List<String> m3GameTitlesIn(File file) throws IOException {
+		try (var in = new FileInputStream(file)) {
+			return new M3CheatsParser().parse(in).games().stream().map(Game::getTitle).toList();
+		}
+	}
+
+	private static Game gameWithAMasterCode() {
+		Game game = game("Mario Kart DS (USA)");
+		game.setMasterCode(new ArrayList<>(List.of("1234ABCD", "00000001")));
+		return game;
 	}
 
 	private static Game game(String title) {

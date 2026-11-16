@@ -19,6 +19,9 @@ import codes.archeus.core.domain.Game;
 import codes.archeus.core.parser.CheatFileWriter;
 import codes.archeus.core.parser.EdgeCheatsWriter;
 import codes.archeus.core.parser.EvoCheatsWriter;
+import codes.archeus.core.parser.EzArCodeWriter;
+import codes.archeus.core.parser.M3CheatsWriter;
+import codes.archeus.core.parser.M3Limits;
 import codes.archeus.core.parser.UsayLimits;
 import codes.archeus.core.parser.UsercheatDatWriter;
 import codes.archeus.core.parser.UsercheatXmlWriter;
@@ -26,7 +29,9 @@ import codes.archeus.core.parser.XmlFormat;
 import codes.archeus.desktop.task.ParseFileTask;
 import codes.archeus.desktop.theme.ThemeManager;
 import codes.archeus.desktop.tree.CheatTreeNode;
+import codes.archeus.desktop.util.EzArCodeWarning;
 import codes.archeus.desktop.util.FileChooserUtil;
+import codes.archeus.desktop.util.M3LimitsWarning;
 import codes.archeus.desktop.util.UsayLimitsWarning;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -99,7 +104,9 @@ class FileHandler {
 				FileChooserUtil.USRCHEAT_FILTER,
 				FileChooserUtil.EDGE_FILTER,
 				FileChooserUtil.EVO_FILTER,
-				FileChooserUtil.XML_FILTER
+				FileChooserUtil.XML_FILTER,
+				FileChooserUtil.M3_FILTER,
+				FileChooserUtil.EZARCODE_FILTER
 		)).ifPresent(this::open);
 	}
 
@@ -164,7 +171,9 @@ class FileHandler {
 				FileChooserUtil.EDGE_FILTER,
 				FileChooserUtil.EVO_FILTER,
 				FileChooserUtil.XML_FILTER,
-				FileChooserUtil.ACTION_REPLAY_XML_FILTER
+				FileChooserUtil.ACTION_REPLAY_XML_FILTER,
+				FileChooserUtil.M3_FILTER,
+				FileChooserUtil.EZARCODE_FILTER
 		));
 		filters.remove(currentFilter);
 		filters.addFirst(currentFilter);
@@ -224,6 +233,14 @@ class FileHandler {
 			return FileChooserUtil.EVO_FILTER;
 		}
 
+		if (writer instanceof M3CheatsWriter) {
+			return FileChooserUtil.M3_FILTER;
+		}
+
+		if (writer instanceof EzArCodeWriter) {
+			return FileChooserUtil.EZARCODE_FILTER;
+		}
+
 		if (writer instanceof UsercheatXmlWriter xmlWriter) {
 			return xmlWriter.getFormat() == XmlFormat.ACTION_REPLAY
 					? FileChooserUtil.ACTION_REPLAY_XML_FILTER
@@ -234,8 +251,9 @@ class FileHandler {
 	}
 
 	/**
-	 * The writer for a Save As choice: XML files by the filter chosen, {@code .evoCheats} files for CycloDS, and
-	 * otherwise EDGE when its filter was chosen or {@code usrcheat.dat}.
+	 * The writer for a Save As choice: XML files by the filter chosen, {@code .evoCheats} files for CycloDS,
+	 * {@code .db} files for the M3 menus, and otherwise EDGE or EZ-Flash when its filter was chosen or
+	 * {@code usrcheat.dat}.
 	 */
 	static CheatFileWriter writerForSaveResult(File file, FileChooser.ExtensionFilter filter) {
 		String name = file.getName();
@@ -250,7 +268,15 @@ class FileHandler {
 			return new EvoCheatsWriter();
 		}
 
-		return filter == FileChooserUtil.EDGE_FILTER ? new EdgeCheatsWriter() : new UsercheatDatWriter();
+		if (name.endsWith(".db")) {
+			return new M3CheatsWriter();
+		}
+
+		if (filter == FileChooserUtil.EDGE_FILTER) {
+			return new EdgeCheatsWriter();
+		}
+
+		return filter == FileChooserUtil.EZARCODE_FILTER ? new EzArCodeWriter() : new UsercheatDatWriter();
 	}
 
 	/**
@@ -371,9 +397,42 @@ class FileHandler {
 			return false;
 		}
 
+		String changes = "Saving \"%s\" changes some games".formatted(file.getName());
+
 		if (writer instanceof EdgeCheatsWriter || writer instanceof EvoCheatsWriter) {
 			UsayLimits.Result applied = UsayLimits.apply(games);
-			if ((applied.changed() || !parts.isEmpty()) && !confirmSaveAnyway(file, applied, parts)) {
+			List<String> empty = UsayLimits.emptyFolders(games);
+			boolean changed = applied.changed() || !empty.isEmpty();
+
+			if (changed || !parts.isEmpty()) {
+				String header = changed ? changes : "Saving \"%s\" in %d parts".formatted(file.getName(), parts.size());
+				String summary = UsayLimitsWarning.summary(applied, empty, parts);
+
+				if (!confirmSaveAnyway(header, summary, UsayLimitsWarning.details(applied, empty, parts))) {
+					return false;
+				}
+			}
+		}
+
+		if (writer instanceof M3CheatsWriter) {
+			M3Limits.Result applied = M3Limits.apply(games);
+			String summary = M3LimitsWarning.summary(applied);
+
+			if (applied.changed() && !confirmSaveAnyway(changes, summary, M3LimitsWarning.details(applied))) {
+				return false;
+			}
+		}
+
+		if (writer instanceof EzArCodeWriter) {
+			List<String> withMasterCodes = EzArCodeWriter.gamesWithMasterCodes(games);
+
+			if (!withMasterCodes.isEmpty()
+					&& !confirmSaveAnyway(
+							changes,
+							EzArCodeWarning.summary(withMasterCodes),
+							EzArCodeWarning.details(withMasterCodes)
+					)
+			) {
 				return false;
 			}
 		}
@@ -393,21 +452,19 @@ class FileHandler {
 	}
 
 	/**
-	 * Warns that the saved file will differ from the open one, listing every part, folder split and code left out, and
-	 * returns whether to save anyway.
+	 * Warns that the saved file will differ from the open one, with the full list in an expandable part, and returns
+	 * whether to save anyway.
 	 */
-	private boolean confirmSaveAnyway(File file, UsayLimits.Result applied, List<String> parts) {
+	private boolean confirmSaveAnyway(String header, String summary, String details) {
 		var alert = new Alert(Alert.AlertType.WARNING);
 		alert.setTitle("This Format Can't Hold Everything");
-		alert.setHeaderText(applied.changed()
-				? "Saving \"" + file.getName() + "\" changes some games"
-				: "Saving \"" + file.getName() + "\" in " + parts.size() + " parts");
-		alert.setContentText(UsayLimitsWarning.summary(applied, parts));
+		alert.setHeaderText(header);
+		alert.setContentText(summary);
 
-		var details = new TextArea(UsayLimitsWarning.details(applied, parts));
-		details.setEditable(false);
-		details.setWrapText(false);
-		alert.getDialogPane().setExpandableContent(details);
+		var area = new TextArea(details);
+		area.setEditable(false);
+		area.setWrapText(false);
+		alert.getDialogPane().setExpandableContent(area);
 
 		var saveAnyway = new ButtonType("Save Anyway", ButtonBar.ButtonData.OK_DONE);
 		var cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);

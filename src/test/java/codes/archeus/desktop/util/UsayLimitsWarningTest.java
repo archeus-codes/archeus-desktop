@@ -17,6 +17,7 @@ package codes.archeus.desktop.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -38,17 +39,24 @@ class UsayLimitsWarningTest {
 				1 code has more than %d lines, which this format can't hold, so the saved file leaves them out. \
 				The open file stays as it is.""".formatted(UsayLimits.MAX_FOLDER_CODES, UsayLimits.MAX_CODE_LINES);
 
-		assertThat(UsayLimitsWarning.summary(result, List.of())).isEqualTo(expected);
+		assertThat(UsayLimitsWarning.summary(result, List.of(), List.of())).isEqualTo(expected);
 	}
 
 	@Test
 	void summary_onlySplit_leavesOutTheLeftOutSentence() {
 		var result = new UsayLimits.Result(List.of(), List.of("Animal Crossing: Items (8 parts)"), List.of());
 
-		assertThat(UsayLimitsWarning.summary(result, List.of()))
+		assertThat(UsayLimitsWarning.summary(result, List.of(), List.of()))
 				.startsWith("1 folder has more than %d codes".formatted(UsayLimits.MAX_FOLDER_CODES))
 				.doesNotContain("lines")
 				.endsWith("The open file stays as it is.");
+	}
+
+	@Test
+	void summary_largeCount_groupsItsDigits() {
+		var result = new UsayLimits.Result(List.of(), List.of(), Collections.nCopies(1500, "Game: Code"));
+
+		assertThat(UsayLimitsWarning.summary(result, List.of(), List.of())).startsWith("1,500 codes have more than");
 	}
 
 	@Test
@@ -59,7 +67,7 @@ class UsayLimitsWarningTest {
 				List.of("Pokemon Black: Liberty Ticket", "Pokemon White: Liberty Ticket")
 		);
 
-		assertThat(UsayLimitsWarning.details(result, List.of())).isEqualTo("""
+		assertThat(UsayLimitsWarning.details(result, List.of(), List.of())).isEqualTo("""
 				Split into parts:
 				  Animal Crossing: Items (8 parts)
 				Left out:
@@ -68,10 +76,27 @@ class UsayLimitsWarningTest {
 	}
 
 	@Test
+	void summary_emptyFolders_namesThemLeftOut() {
+		var result = new UsayLimits.Result(List.of(), List.of(), List.of());
+
+		assertThat(UsayLimitsWarning.summary(result, List.of("Game: New Folder", "Game: Level Codes"), List.of()))
+				.isEqualTo("2 folders are empty and left out of the saved file. The open file stays as it is.");
+	}
+
+	@Test
+	void details_emptyFolders_listsThemUnderTheirHeading() {
+		var result = new UsayLimits.Result(List.of(), List.of(), List.of());
+
+		assertThat(UsayLimitsWarning.details(result, List.of("Game: New Folder"), List.of())).isEqualTo("""
+				Empty folders left out:
+				  Game: New Folder""");
+	}
+
+	@Test
 	void summary_parts_namesEachFileFirst() {
 		var result = new UsayLimits.Result(List.of(), List.of(), List.of());
 
-		assertThat(UsayLimitsWarning.summary(result, List.of("#-L/cheats.dat", "M-Z/cheats.dat")))
+		assertThat(UsayLimitsWarning.summary(result, List.of(), List.of("#-L/cheats.dat", "M-Z/cheats.dat")))
 				.startsWith("It has more than %,d games".formatted(UsayParts.MAX_GAMES))
 				.contains("It saves as 2 files")
 				.contains(": #-L/cheats.dat, M-Z/cheats.dat.")
@@ -82,8 +107,9 @@ class UsayLimitsWarningTest {
 	@Test
 	void details_partsAndSplit_listsThePartsFirst() {
 		var result = new UsayLimits.Result(List.of(), List.of("Animal Crossing: Items (8 parts)"), List.of());
+		List<String> parts = List.of("#-L/cheats.dat", "M-Z/cheats.dat");
 
-		assertThat(UsayLimitsWarning.details(result, List.of("#-L/cheats.dat", "M-Z/cheats.dat"))).isEqualTo("""
+		assertThat(UsayLimitsWarning.details(result, List.of(), parts)).isEqualTo("""
 				Saved as:
 				  #-L/cheats.dat
 				  M-Z/cheats.dat

@@ -22,10 +22,17 @@ and writes files with [archeus-core](https://github.com/archeus-codes/archeus-co
 | Action Replay DS(i) XML | `cheats.xml` | Yes | Yes |
 | EDGE and iEDGE | `cheats.dat` | Yes | Yes |
 | CycloDS Evolution | `user.evoCheats` | Yes | Yes |
+| M3 DS Real / M3i Zero | `cheat_EN.db` | Yes | Yes |
+| EZ-Flash V (original menu) | `ezarcode.dat` | Yes | Yes |
 
 EDGE and CycloDS have limits: 4,096 games in a file, 255 codes in a folder and 255 lines in a code. Saving past them
 splits a large folder into several, writes a large database as one file per range of letters and leaves out codes
 that are too long, after a warning that lists every change.
+
+An M3 file has no master codes, one at a time folders or codes switched on, and leaves out codes with placeholder
+lines. Its text is GBK, so characters GBK lacks become `?`. Saving as one warns about each first.
+
+An EZ-Flash `ezarcode.dat` has no master codes, so saving as one warns about them first.
 
 ### Editing
 
@@ -36,7 +43,7 @@ that are too long, after a warning that lists every change.
   same check as the site. You can keep editing or keep it anyway.
 - Load ROM, which reads a game's ID from its ROM, and Find Duplicates, which finds games sharing an ID.
 - A Button Activator that wraps a code so it runs only while chosen buttons are held.
-- Export of one game for melonDS (`.mch`) or RetroArch (`.cht`).
+- Export of one game for melonDS (`.mch`), RetroArch (`.cht`) or DeSmuME (`.dct`).
 
 ### Look
 

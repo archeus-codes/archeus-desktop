@@ -20,6 +20,10 @@ import codes.archeus.core.parser.EdgeCheatsParser;
 import codes.archeus.core.parser.EdgeCheatsWriter;
 import codes.archeus.core.parser.EvoCheatsParser;
 import codes.archeus.core.parser.EvoCheatsWriter;
+import codes.archeus.core.parser.EzArCodeParser;
+import codes.archeus.core.parser.EzArCodeWriter;
+import codes.archeus.core.parser.M3CheatsParser;
+import codes.archeus.core.parser.M3CheatsWriter;
 import codes.archeus.core.parser.ParseResult;
 import codes.archeus.core.parser.UsercheatDatParser;
 import codes.archeus.core.parser.UsercheatDatWriter;
@@ -49,6 +53,7 @@ public class ParseFileTask extends Task<ParseFileTask.Result> {
 	private record Parsed(ParseResult parseResult, CheatFileWriter writer) {}
 
 	private static final byte[] EDGE_MAGIC = {'E', 'D', 'G', 'E'};
+	private static final byte[] EZARCODE_MAGIC = "EZ ARDS".getBytes(StandardCharsets.US_ASCII);
 
 	/** The master code cheat as Datel's Action Replay code lists name it, in either case; R4CCE never does. */
 	private static final List<byte[]> ACTION_REPLAY_MASTER_CHEATS = List.of(
@@ -107,16 +112,29 @@ public class ParseFileTask extends Task<ParseFileTask.Result> {
 			}
 		}
 
+		if (name.endsWith(".db")) {
+			try (var in = new FileInputStream(file)) {
+				return new Parsed(new M3CheatsParser().parse(in), new M3CheatsWriter());
+			}
+		}
+
 		if (!name.endsWith(".dat")) {
 			int dot = name.lastIndexOf('.');
 			String extension = dot >= 0 ? name.substring(dot) : name;
 			throw new UnsupportedOperationException("Unsupported file format: " + extension);
 		}
 
-		// A .dat file starting with "EDGE" is EDGE's; any other is usrcheat.dat.
-		if (isEdgeFormat(file)) {
+		// A .dat file starting with "EDGE" is EDGE's, one starting with "EZ ARDS" is EZ-Flash's; any other is
+		// usrcheat.dat.
+		if (startsWith(file, EDGE_MAGIC)) {
 			try (var in = new FileInputStream(file)) {
 				return new Parsed(new EdgeCheatsParser().parse(in), new EdgeCheatsWriter());
+			}
+		}
+
+		if (startsWith(file, EZARCODE_MAGIC)) {
+			try (var in = new FileInputStream(file)) {
+				return new Parsed(new EzArCodeParser().parse(in), new EzArCodeWriter());
 			}
 		}
 
@@ -129,10 +147,9 @@ public class ParseFileTask extends Task<ParseFileTask.Result> {
 		}
 	}
 
-	private static boolean isEdgeFormat(File file) throws IOException {
+	private static boolean startsWith(File file, byte[] magic) throws IOException {
 		try (var in = new FileInputStream(file)) {
-			byte[] magic = in.readNBytes(EDGE_MAGIC.length);
-			return Arrays.equals(magic, EDGE_MAGIC);
+			return Arrays.equals(in.readNBytes(magic.length), magic);
 		}
 	}
 

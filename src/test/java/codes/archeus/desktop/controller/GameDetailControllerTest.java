@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,10 +36,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import codes.archeus.core.domain.Code;
 import codes.archeus.core.domain.Folder;
 import codes.archeus.core.domain.Game;
+import codes.archeus.core.parser.DesmumeParser;
+import codes.archeus.core.parser.DesmumeWriter;
 import codes.archeus.core.parser.MelonDsParser;
 import codes.archeus.core.parser.RetroArchParser;
 import codes.archeus.core.util.CheatFileConstants;
@@ -488,24 +493,28 @@ class GameDetailControllerTest {
 		}
 	}
 
-	@Test
-	void export_retroArch_leavesOutTemplatesAndTheFolderTheyEmpty() throws Exception {
-		Path target = dir.resolve("game.cht");
+	@ParameterizedTest
+	@EnumSource(EmulatorFormat.class)
+	void export_eachFormat_namesTheFileAndLeavesOutTemplatesAndTheirFolder(EmulatorFormat format) throws Exception {
 		var game = gameWithCodes();
 		game.getFolders().getFirst().getCodes().getFirst().setCodeLines(List.of("0200???? 00000063"));
+		var suggested = new ArrayList<String>();
 
 		FxThread.run(() -> {
 			controller.populate(new GameViewModel(game));
-			controller.setExportChooser((_, _) -> Optional.of(target.toFile()));
+			controller.setExportChooser((_, name) -> {
+				suggested.add(name);
+				return Optional.of(dir.resolve(name).toFile());
+			});
 
-			exportItem(EmulatorFormat.RETROARCH).fire();
+			exportItem(format).fire();
 		});
 
-		try (var in = Files.newInputStream(target)) {
-			var read = new RetroArchParser().parse(in);
-			assertThat(read.getCodes()).extracting(Code::getTitle).containsExactly("Infinite Health");
-			assertThat(read.getFolders()).isEmpty();
-		}
+		String expectedName = "Mario Kart DS (USA) [AMCE 12345678]" + format.gameFileFormat().extension();
+		assertThat(suggested).containsExactly(expectedName);
+		Game read = read(format, dir.resolve(suggested.getFirst()));
+		assertThat(read.getCodes()).extracting(Code::getTitle).containsExactly("Infinite Health");
+		assertThat(read.getFolders()).isEmpty();
 	}
 
 	@Test
@@ -559,25 +568,55 @@ class GameDetailControllerTest {
 	}
 
 	@Test
-	void populate_gameWithOnlyATemplate_turnsBothFormatsOff() throws Exception {
+	void populate_gameWithOnlyATemplate_turnsEveryFormatOff() throws Exception {
 		var game = game("AMCE", "12345678");
 		game.getCodes().add(code("Item Modifier", "0200???? 00000063"));
 
 		FxThread.run(() -> {
 			controller.populate(new GameViewModel(game));
 
-			assertThat(exportItem(EmulatorFormat.MELONDS).isDisable()).isTrue();
-			assertThat(exportItem(EmulatorFormat.RETROARCH).isDisable()).isTrue();
+			for (EmulatorFormat format : EmulatorFormat.values()) {
+				assertThat(exportItem(format).isDisable()).as(format.name()).isTrue();
+			}
 		});
 	}
 
 	@Test
-	void populate_gameWithCodes_offersBothFormats() throws Exception {
+	void populate_codeWithNoLines_offersMelonDsAlone() throws Exception {
+		var game = game("AMCE", "12345678");
+		game.getCodes().add(code("Datel", List.of()));
+
 		FxThread.run(() -> {
-			controller.populate(new GameViewModel(gameWithCodes()));
+			controller.populate(new GameViewModel(game));
+
+			assertThat(exportItem(EmulatorFormat.MELONDS).isDisable()).isFalse();
+			assertThat(exportItem(EmulatorFormat.RETROARCH).isDisable()).isTrue();
+			assertThat(exportItem(EmulatorFormat.DESMUME).isDisable()).isTrue();
+		});
+	}
+
+	@Test
+	void populate_codeOverDesmumesLineLimit_turnsDesmumeAloneOff() throws Exception {
+		var game = game("AMCE", "12345678");
+		game.getCodes().add(code("Huge", Collections.nCopies(DesmumeWriter.MAX_LINES + 1, "02000000 00000063")));
+
+		FxThread.run(() -> {
+			controller.populate(new GameViewModel(game));
 
 			assertThat(exportItem(EmulatorFormat.MELONDS).isDisable()).isFalse();
 			assertThat(exportItem(EmulatorFormat.RETROARCH).isDisable()).isFalse();
+			assertThat(exportItem(EmulatorFormat.DESMUME).isDisable()).isTrue();
+		});
+	}
+
+	@Test
+	void populate_gameWithCodes_offersEveryFormat() throws Exception {
+		FxThread.run(() -> {
+			controller.populate(new GameViewModel(gameWithCodes()));
+
+			for (EmulatorFormat format : EmulatorFormat.values()) {
+				assertThat(exportItem(format).isDisable()).as(format.name()).isFalse();
+			}
 		});
 	}
 
@@ -635,9 +674,26 @@ class GameDetailControllerTest {
 	}
 
 	private static Code code(String title, String line) {
+		return code(title, List.of(line));
+	}
+
+	private static Code code(String title, List<String> lines) {
 		var code = new Code();
 		code.setTitle(title);
-		code.setCodeLines(List.of(line));
+		code.setCodeLines(lines);
 		return code;
+	}
+
+	/**
+	 * The exported file read back with the format's own parser.
+	 */
+	private static Game read(EmulatorFormat format, Path file) throws IOException {
+		try (var in = Files.newInputStream(file)) {
+			return switch (format) {
+				case MELONDS -> new MelonDsParser().parse(in);
+				case RETROARCH -> new RetroArchParser().parse(in);
+				case DESMUME -> new DesmumeParser().parse(in);
+			};
+		}
 	}
 }

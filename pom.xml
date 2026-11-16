@@ -51,7 +51,7 @@
     <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <archeus-core.version>1.1.0</archeus-core.version>
+    <archeus-core.version>1.2.0</archeus-core.version>
     <assertj.version>3.27.7</assertj.version>
     <junit.version>6.1.3</junit.version>
     <slf4j.version>2.0.20</slf4j.version>
@@ -200,6 +200,10 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${maven.surefire.version}</version>
+          <configuration>
+            <!-- Tests run in English so formatted numbers match on any machine; @{argLine} keeps JaCoCo's agent -->
+            <argLine>@{argLine} -Duser.language=en -Duser.country=US</argLine>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -459,7 +463,7 @@
                       <arg value="--module-path"/>
                       <arg value="${project.build.directory}/javafx-mods"/>
                       <arg value="--add-modules"/>
-                      <arg value="javafx.controls,javafx.fxml,java.logging,java.net.http"/>
+                      <arg value="javafx.controls,javafx.fxml,java.logging,java.net.http,jdk.charsets"/>
                       <arg value="--strip-native-commands"/>
                       <arg value="--strip-debug"/>
                       <arg value="--no-man-pages"/>
@@ -502,7 +506,7 @@
                 <goals><goal>exec</goal></goals>
                 <configuration>
                   <executable>${java.home}/bin/jpackage</executable>
-                  <commandlineArgs>--type app-image --name Archeus --app-version ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion} --vendor Archeus --input ${project.build.directory}/app-input --main-jar ${project.build.finalName}.jar --main-class codes.archeus.desktop.app.Launcher --runtime-image ${project.build.directory}/runtime --java-options "--add-modules=javafx.controls,javafx.fxml,java.logging,java.net.http --enable-native-access=javafx.graphics -XX:G1PeriodicGCInterval=30000 -XX:-G1PeriodicGCInvokesConcurrent -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=30" --icon ${jpackage.icon} --dest ${project.build.directory}/dist</commandlineArgs>
+                  <commandlineArgs>--type app-image --name Archeus --app-version ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion} --vendor Archeus --input ${project.build.directory}/app-input --main-jar ${project.build.finalName}.jar --main-class codes.archeus.desktop.app.Launcher --runtime-image ${project.build.directory}/runtime --java-options "--add-modules=javafx.controls,javafx.fxml,java.logging,java.net.http,jdk.charsets --enable-native-access=javafx.graphics -XX:G1PeriodicGCInterval=30000 -XX:-G1PeriodicGCInvokesConcurrent -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=30" --icon ${jpackage.icon} --dest ${project.build.directory}/dist</commandlineArgs>
                 </configuration>
               </execution>
             </executions>

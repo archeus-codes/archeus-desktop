@@ -38,10 +38,11 @@ public final class UsayLimitsWarning {
 	}
 
 	/**
-	 * A short account of what changes in the saved file. {@code parts} names each part's file, such as
-	 * {@code M-Z/cheats.dat}, and is empty when it saves as one file.
+	 * A short account of what changes in the saved file. {@code empty} names the folders with no codes, from
+	 * {@link UsayLimits#emptyFolders(List)}. {@code parts} names each part's file, such as {@code M-Z/cheats.dat}, and
+	 * is empty when it saves as one file.
 	 */
-	public static String summary(UsayLimits.Result result, List<String> parts) {
+	public static String summary(UsayLimits.Result result, List<String> empty, List<String> parts) {
 		List<String> sentences = new ArrayList<>();
 
 		if (!parts.isEmpty()) {
@@ -58,15 +59,20 @@ public final class UsayLimitsWarning {
 			sentences.add(LEFT_OUT.formatted(codes, UsayLimits.MAX_CODE_LINES));
 		}
 
+		if (!empty.isEmpty()) {
+			String folders = count(empty.size(), EmptyFolderWarning.ONE, EmptyFolderWarning.MANY);
+			sentences.add(EmptyFolderWarning.SENTENCE.formatted(folders));
+		}
+
 		sentences.add("The open file stays as it is.");
 
 		return String.join(" ", sentences);
 	}
 
 	/**
-	 * Every part, folder split and code left out, one per line.
+	 * Every part, folder split, code left out and empty folder, one per line.
 	 */
-	public static String details(UsayLimits.Result result, List<String> parts) {
+	public static String details(UsayLimits.Result result, List<String> empty, List<String> parts) {
 		List<String> lines = new ArrayList<>();
 
 		if (!parts.isEmpty()) {
@@ -84,10 +90,15 @@ public final class UsayLimitsWarning {
 			result.leftOut().forEach(entry -> lines.add("  " + entry));
 		}
 
+		if (!empty.isEmpty()) {
+			lines.add(EmptyFolderWarning.HEADING);
+			empty.forEach(entry -> lines.add("  " + entry));
+		}
+
 		return String.join("\n", lines);
 	}
 
 	private static String count(int n, String one, String many) {
-		return "%d %s".formatted(n, n == 1 ? one : many);
+		return "%,d %s".formatted(n, n == 1 ? one : many);
 	}
 }
